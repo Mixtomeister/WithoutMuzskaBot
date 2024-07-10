@@ -31,24 +31,28 @@ RELATIVE_MSG = '{num_years} {str_years}, {num_months} {str_months} y {num_days} 
 
 def get_relative_time(dt):
     return RELATIVE_MSG.format(num_years=dt.years,
-                               str_years='años' if dt.years != 1 else 'año',
-                               num_months=dt.months,
-                               str_months='meses' if dt.months != 1 else 'mes',
-                               num_days=dt.days,
-                               str_days='días' if dt.days != 1 else 'día')
+                            str_years='años' if dt.years != 1 else 'año',
+                            num_months=dt.months,
+                            str_months='meses' if dt.months != 1 else 'mes',
+                            num_days=dt.days,
+                            str_days='días' if dt.days != 1 else 'día')
 
 
 def send_tweet_update():
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-    tw = tweepy.API(auth)
+
+    client = tweepy.Client(
+        consumer_key=CONSUMER_KEY,
+        consumer_secret=CONSUMER_SECRET,
+        access_token=ACCESS_KEY,
+        access_token_secret=ACCESS_SECRET
+    )
 
     now = datetime.now().astimezone(CET)
     relative_last_tweet = relativedelta(now, MUZSKA_LAST_TWEET).normalized()
     relative_last_video = relativedelta(now, MUZSKA_LAST_VIDEO).normalized()
 
     logger.info("Sending Tweet...")
-    tw.update_status(TWEET_MSG.format(last_tweet=get_relative_time(relative_last_tweet), last_video=get_relative_time(relative_last_video)))
+    client.create_tweet(text=TWEET_MSG.format(last_tweet=get_relative_time(relative_last_tweet), last_video=get_relative_time(relative_last_video)))
     logger.info('Tweet sent')
 
 
