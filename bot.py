@@ -3,6 +3,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 import tweepy
+import atproto
 import os
 import logging
 
@@ -12,14 +13,20 @@ logging.basicConfig(format=FORMAT)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
-CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
-ACCESS_KEY = os.environ.get('ACCESS_KEY')
-ACCESS_SECRET = os.environ.get('ACCESS_SECRET')
+TW_CONSUMER_KEY = os.environ.get('TW_CONSUMER_KEY')
+TW_CONSUMER_SECRET = os.environ.get('TW_TW_CONSUMER_SECRET')
+TW_ACCESS_KEY = os.environ.get('TW_ACCESS_KEY')
+TW_ACCESS_SECRET = os.environ.get('TW_ACCESS_SECRET')
+
+BSKY_USERNAME = os.environ.get('BSKY_USERNAME')
+BSKY_APP_PASSWORD = os.environ.get('BSKY_APP_PASSWORD')
 
 MUZSKA_LAST_TWEET_DATE = os.environ.get('MUZSKA_LAST_TWEET_DATE')
 MUZSKA_LAST_VIDEO_DATE = os.environ.get('MUZSKA_LAST_VIDEO_DATE')
 DATE_FORMAT = os.environ.get('DATE_FORMAT')
+
+TW_POST = os.environ.get('TW_POST') == '1'
+BSKY_POST = os.environ.get('BSKY_POST') == '1'
 
 CET = tz.gettz('CET')
 MUZSKA_LAST_TWEET = datetime.strptime(MUZSKA_LAST_TWEET_DATE, DATE_FORMAT).astimezone(CET)
@@ -27,7 +34,6 @@ MUZSKA_LAST_VIDEO = datetime.strptime(MUZSKA_LAST_VIDEO_DATE, DATE_FORMAT).astim
 
 TWEET_MSG = 'Días sin Muzska:\n\nÚltimo tweet: {last_tweet}\nÚltimo video: {last_video}\n\nMuzska te echamos de menos <3'
 RELATIVE_MSG = '{num_years} {str_years}, {num_months} {str_months} y {num_days} {str_days}'
-
 
 def get_relative_time(dt):
     return RELATIVE_MSG.format(num_years=dt.years,
@@ -37,32 +43,48 @@ def get_relative_time(dt):
                             num_days=dt.days,
                             str_days='días' if dt.days != 1 else 'día')
 
-
-def send_tweet_update():
-
-    client = tweepy.Client(
-        consumer_key=CONSUMER_KEY,
-        consumer_secret=CONSUMER_SECRET,
-        access_token=ACCESS_KEY,
-        access_token_secret=ACCESS_SECRET
-    )
-
+def get_post():
     now = datetime.now().astimezone(CET)
     relative_last_tweet = relativedelta(now, MUZSKA_LAST_TWEET).normalized()
     relative_last_video = relativedelta(now, MUZSKA_LAST_VIDEO).normalized()
 
-    logger.info("Sending Tweet...")
-    client.create_tweet(text=TWEET_MSG.format(last_tweet=get_relative_time(relative_last_tweet), last_video=get_relative_time(relative_last_video)))
-    logger.info('Tweet sent')
+    return TWEET_MSG.format(last_tweet=get_relative_time(relative_last_tweet), last_video=get_relative_time(relative_last_video))
+
+def send_twitter_post(post):
+    logger.info("[TW] Login to Twitter...")
+    client = tweepy.Client(
+        consumer_key=TW_CONSUMER_KEY,
+        consumer_secret=TW_CONSUMER_SECRET,
+        access_token=TW_ACCESS_KEY,
+        access_token_secret=TW_ACCESS_SECRET
+    )
+
+    logger.info("[TW] Sending Tweet...")
+    client.create_tweet(text=post)
+    logger.info('[TW] Tweet sent')
+
+def send_bluesky_post(post):
+    logger.info("[BSKY] Login to Bluesky...")
+    client = atproto.Client()
+    client.login(BSKY_USERNAME, BSKY_APP_PASSWORD)
+
+    logger.info("[BSKY] Sending Post...")
+    text = atproto.client_utils.TextBuilder().text(post)
+    client.send_post(text)
+    logger.info("[BSKY] Post sent")
 
 
 def lambda_handler(event, context):
     try:
-        send_tweet_update()
+        main()
     except Exception as e:
         logger.error(e)
         exit(1)
 
+def main():
+    post = get_post()
+    send_twitter_post(post) if TW_POST else None
+    send_bluesky_post(post) if BSKY_POST else None
 
 if __name__ == '__main__':
-    send_tweet_update()
+    main()
