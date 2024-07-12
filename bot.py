@@ -14,7 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 TW_CONSUMER_KEY = os.environ.get('TW_CONSUMER_KEY')
-TW_CONSUMER_SECRET = os.environ.get('TW_TW_CONSUMER_SECRET')
+TW_CONSUMER_SECRET = os.environ.get('TW_CONSUMER_SECRET')
 TW_ACCESS_KEY = os.environ.get('TW_ACCESS_KEY')
 TW_ACCESS_SECRET = os.environ.get('TW_ACCESS_SECRET')
 
