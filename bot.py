@@ -2,8 +2,9 @@ from dateutil import tz
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
+from bsky_client import BskyClient
+
 import tweepy
-import atproto
 import os
 import logging
 
@@ -65,12 +66,14 @@ def send_twitter_post(post):
 
 def send_bluesky_post(post):
     logger.info("[BSKY] Login to Bluesky...")
-    client = atproto.Client()
-    client.login(BSKY_USERNAME, BSKY_APP_PASSWORD)
+
+    bsky_client = BskyClient(BSKY_USERNAME, BSKY_APP_PASSWORD)
+    bsky_client.create_session()
 
     logger.info("[BSKY] Sending Post...")
-    text = atproto.client_utils.TextBuilder().text(post)
-    client.send_post(text)
+
+    bsky_client.send_post(post)
+    
     logger.info("[BSKY] Post sent")
 
 
