@@ -22,7 +22,6 @@ TW_ACCESS_SECRET = os.environ.get('TW_ACCESS_SECRET')
 BSKY_USERNAME = os.environ.get('BSKY_USERNAME')
 BSKY_APP_PASSWORD = os.environ.get('BSKY_APP_PASSWORD')
 
-MUZSKA_LAST_TWEET_DATE = os.environ.get('MUZSKA_LAST_TWEET_DATE')
 MUZSKA_LAST_VIDEO_DATE = os.environ.get('MUZSKA_LAST_VIDEO_DATE')
 DATE_FORMAT = os.environ.get('DATE_FORMAT')
 
@@ -30,10 +29,9 @@ TW_POST = os.environ.get('TW_POST') == '1'
 BSKY_POST = os.environ.get('BSKY_POST') == '1'
 
 CET = tz.gettz('CET')
-MUZSKA_LAST_TWEET = datetime.strptime(MUZSKA_LAST_TWEET_DATE, DATE_FORMAT).astimezone(CET)
 MUZSKA_LAST_VIDEO = datetime.strptime(MUZSKA_LAST_VIDEO_DATE, DATE_FORMAT).astimezone(CET)
 
-TWEET_MSG = 'Días sin Muzska:\n\nÚltimo tweet: {last_tweet}\nÚltimo video: {last_video}\n\nMuzska te echamos de menos <3'
+TWEET_MSG = 'Días sin Muzska:\n\n{last_video}\n\nMuzska te echamos de menos <3'
 RELATIVE_MSG = '{num_years} {str_years}, {num_months} {str_months} y {num_days} {str_days}'
 
 def get_relative_time(dt):
@@ -46,10 +44,9 @@ def get_relative_time(dt):
 
 def get_post():
     now = datetime.now().astimezone(CET)
-    relative_last_tweet = relativedelta(now, MUZSKA_LAST_TWEET).normalized()
     relative_last_video = relativedelta(now, MUZSKA_LAST_VIDEO).normalized()
 
-    return TWEET_MSG.format(last_tweet=get_relative_time(relative_last_tweet), last_video=get_relative_time(relative_last_video))
+    return TWEET_MSG.format(last_video=get_relative_time(relative_last_video))
 
 def send_twitter_post(post):
     logger.info("[TW] Login to Twitter...")
