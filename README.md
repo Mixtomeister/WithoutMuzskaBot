@@ -15,8 +15,7 @@ Bluesky [@withoutmuzska.bsky.social](https://bsky.app/profile/withoutmuzska.bsky
 | TW_ACCESS_SECRET | Access secret key required by Twitter API |
 | BSKY_USERNAME | Username of Bluesky account |
 | BSKY_APP_PASSWORD | App Password generated in Bluesky account |
-| MUZSKA_LAST_TWEET_DATE | Date of the last tweet of Muzska |
 | MUZSKA_LAST_VIDEO_DATE | Date of the last video of Muzska |
 | DATE_FORMAT | Format used to indicate the dates of last video and last tweet |
-| TW_POST | Variable to skip Twitter post |
-| BSKY_POST | Variable to skip Bluesky post |
+| TW_POST | Variable to enable Twitter post |
+| BSKY_POST | Variable to enable Bluesky post |
